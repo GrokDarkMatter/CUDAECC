@@ -40,7 +40,7 @@ int herror_count;                          // Host side error count for GPU deco
 int PCECCMalloc(int k, int p, int size)
 {
     cudaError_t cudaStatus;
-	int totBuf = k + p;                     // Add extra buffers for the check buffers
+	int totBuf = k + p;                     // Total buffers for original data and check
 
     // Create and assign each buffer of the codeword
     for (int i = 0; i < totBuf; i++)

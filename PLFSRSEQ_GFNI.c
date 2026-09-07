@@ -1,30 +1,15 @@
-//***************************************************************************************
-// Copyright 2026 by StreamScale Inc. All rights reserved.
-// This software is free to use for non-commercial or evaluation purposes, but may not 
-// be redistributed or sold for any commercial purpose without the express written
-// permission of StreamScale Inc.
-// 
-// In other words, this code is provided solely for the purposes of
-// evaluation and is not licensed or intended to be licensed or used as part of
-// or in connection with any commercial or non - commercial use other than evaluation
-// of the potential for a license from StreamScale Inc. Neither StreamScale Inc. 
-// nor any affiliated person grants any express or implied rights under any patents,
-// copyrights, trademarks, or trade secret information. 
-// 
-// This software includes contributions protected by 
-// U.S. Patents 11,848,686 and 12,341,532
-//***************************************************************************************
-
 #include "PLFSRSEQ_GFNI.h"
 uint64_t PCErrCnt = 0;                 // Host side error count for GFNI decoder errors
 
-// Parallel LFSRD_SR Sequencer for P = 2 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 2 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer2_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 2 ], taps [ 1 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 2 ], taps [ 1 ] ;     // Parity registers
     __m512i data_vec, temp [ 1 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x49]);
@@ -91,13 +76,15 @@ void ParallelLFSRSequencer2_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 3 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 3 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer3_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 3 ], taps [ 1 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 3 ], taps [ 1 ] ;     // Parity registers
     __m512i data_vec, temp [ 1 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x8d]);
@@ -170,13 +157,15 @@ void ParallelLFSRSequencer3_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 4 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 4 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer4_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 4 ], taps [ 2 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 4 ], taps [ 2 ] ;     // Parity registers
     __m512i data_vec, temp [ 2 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x38]);
@@ -256,13 +245,15 @@ void ParallelLFSRSequencer4_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 5 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 5 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer5_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 5 ], taps [ 2 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 5 ], taps [ 2 ] ;     // Parity registers
     __m512i data_vec, temp [ 2 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xce]);
@@ -348,13 +339,15 @@ void ParallelLFSRSequencer5_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 6 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 6 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer6_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 6 ], taps [ 3 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 6 ], taps [ 3 ] ;     // Parity registers
     __m512i data_vec, temp [ 3 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x25]);
@@ -447,13 +440,15 @@ void ParallelLFSRSequencer6_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 7 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 7 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer7_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 7 ], taps [ 3 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 7 ], taps [ 3 ] ;     // Parity registers
     __m512i data_vec, temp [ 3 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x6b]);
@@ -552,13 +547,15 @@ void ParallelLFSRSequencer7_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 8 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 8 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer8_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 8 ], taps [ 4 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 8 ], taps [ 4 ] ;     // Parity registers
     __m512i data_vec, temp [ 4 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xee]);
@@ -664,13 +661,15 @@ void ParallelLFSRSequencer8_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 9 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 9 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer9_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 9 ], taps [ 4 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 9 ], taps [ 4 ] ;     // Parity registers
     __m512i data_vec, temp [ 4 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xa3]);
@@ -782,13 +781,15 @@ void ParallelLFSRSequencer9_GFNI(int len, int k, unsigned char **data, int decod
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 10 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 10 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer10_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 10 ], taps [ 5 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 10 ], taps [ 5 ] ;     // Parity registers
     __m512i data_vec, temp [ 5 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x93]);
@@ -907,13 +908,15 @@ void ParallelLFSRSequencer10_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 11 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 11 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer11_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 11 ], taps [ 5 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 11 ], taps [ 5 ] ;     // Parity registers
     __m512i data_vec, temp [ 5 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xef]);
@@ -1038,13 +1041,15 @@ void ParallelLFSRSequencer11_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 12 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 12 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer12_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 12 ], taps [ 6 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 12 ], taps [ 6 ] ;     // Parity registers
     __m512i data_vec, temp [ 6 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x12]);
@@ -1176,13 +1181,15 @@ void ParallelLFSRSequencer12_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 13 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 13 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer13_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 13 ], taps [ 6 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 13 ], taps [ 6 ] ;     // Parity registers
     __m512i data_vec, temp [ 6 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x99]);
@@ -1320,13 +1327,15 @@ void ParallelLFSRSequencer13_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 14 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 14 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer14_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 14 ], taps [ 7 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 14 ], taps [ 7 ] ;     // Parity registers
     __m512i data_vec, temp [ 7 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xbe]);
@@ -1471,13 +1480,15 @@ void ParallelLFSRSequencer14_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 15 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 15 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer15_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 15 ], taps [ 7 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 15 ], taps [ 7 ] ;     // Parity registers
     __m512i data_vec, temp [ 7 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x2]);
@@ -1628,13 +1639,15 @@ void ParallelLFSRSequencer15_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 16 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 16 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer16_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 16 ], taps [ 8 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 16 ], taps [ 8 ] ;     // Parity registers
     __m512i data_vec, temp [ 8 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x2c]);
@@ -1792,13 +1805,15 @@ void ParallelLFSRSequencer16_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 17 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 17 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer17_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 17 ], taps [ 8 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 17 ], taps [ 8 ] ;     // Parity registers
     __m512i data_vec, temp [ 8 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x9c]);
@@ -1962,13 +1977,15 @@ void ParallelLFSRSequencer17_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 18 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 18 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer18_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 18 ], taps [ 9 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 18 ], taps [ 9 ] ;     // Parity registers
     __m512i data_vec, temp [ 9 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xf0]);
@@ -2139,13 +2156,15 @@ void ParallelLFSRSequencer18_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 19 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 19 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer19_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 19 ], taps [ 9 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 19 ], taps [ 9 ] ;     // Parity registers
     __m512i data_vec, temp [ 9 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x69]);
@@ -2322,13 +2341,15 @@ void ParallelLFSRSequencer19_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 20 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 20 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer20_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 20 ], taps [ 10 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 20 ], taps [ 10 ] ;     // Parity registers
     __m512i data_vec, temp [ 10 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xa9]);
@@ -2512,13 +2533,15 @@ void ParallelLFSRSequencer20_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 21 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 21 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer21_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 21 ], taps [ 10 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 21 ], taps [ 10 ] ;     // Parity registers
     __m512i data_vec, temp [ 10 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xf4]);
@@ -2708,13 +2731,15 @@ void ParallelLFSRSequencer21_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 22 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 22 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer22_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 22 ], taps [ 11 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 22 ], taps [ 11 ] ;     // Parity registers
     __m512i data_vec, temp [ 11 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x65]);
@@ -2911,13 +2936,15 @@ void ParallelLFSRSequencer22_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 23 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 23 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer23_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 23 ], taps [ 11 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 23 ], taps [ 11 ] ;     // Parity registers
     __m512i data_vec, temp [ 11 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xe6]);
@@ -3120,13 +3147,15 @@ void ParallelLFSRSequencer23_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 24 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 24 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer24_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 24 ], taps [ 12 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 24 ], taps [ 12 ] ;     // Parity registers
     __m512i data_vec, temp [ 12 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xdf]);
@@ -3336,13 +3365,15 @@ void ParallelLFSRSequencer24_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 25 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 25 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer25_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 25 ], taps [ 12 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 25 ], taps [ 12 ] ;     // Parity registers
     __m512i data_vec, temp [ 12 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x56]);
@@ -3558,13 +3589,15 @@ void ParallelLFSRSequencer25_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 26 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 26 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer26_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 26 ], taps [ 13 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 26 ], taps [ 13 ] ;     // Parity registers
     __m512i data_vec, temp [ 13 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x27]);
@@ -3787,13 +3820,15 @@ void ParallelLFSRSequencer26_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 27 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 27 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer27_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 27 ], taps [ 13 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 27 ], taps [ 13 ] ;     // Parity registers
     __m512i data_vec, temp [ 13 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x61]);
@@ -4022,13 +4057,15 @@ void ParallelLFSRSequencer27_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 28 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 28 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer28_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 28 ], taps [ 14 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 28 ], taps [ 14 ] ;     // Parity registers
     __m512i data_vec, temp [ 14 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xc]);
@@ -4264,13 +4301,15 @@ void ParallelLFSRSequencer28_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 29 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 29 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer29_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 29 ], taps [ 14 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 29 ], taps [ 14 ] ;     // Parity registers
     __m512i data_vec, temp [ 14 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x2a]);
@@ -4512,13 +4551,15 @@ void ParallelLFSRSequencer29_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 30 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 30 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer30_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 30 ], taps [ 15 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 30 ], taps [ 15 ] ;     // Parity registers
     __m512i data_vec, temp [ 15 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x39]);
@@ -4767,13 +4808,15 @@ void ParallelLFSRSequencer30_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 31 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 31 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer31_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 31 ], taps [ 15 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 31 ], taps [ 15 ] ;     // Parity registers
     __m512i data_vec, temp [ 15 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0x20]);
@@ -5028,13 +5071,15 @@ void ParallelLFSRSequencer31_GFNI(int len, int k, unsigned char **data, int deco
     }
 }
 
-// Parallel LFSRD_SR Sequencer for P = 32 Codewords
+// ----------------------------------------------
+// Parallel LFSR Sequencer for P = 32 Codewords
+// ----------------------------------------------
 void ParallelLFSRSequencer32_GFNI(int len, int k, unsigned char **data, int decoder)
 {
-    int curSym, curPos ;                           // Loop counters
-    __m512i parity [ 32 ], taps [ 16 ] ;             // Parity registers
+    int curSym, curPos ;                   // Loop counters
+    __m512i parity [ 32 ], taps [ 16 ] ;     // Parity registers
     __m512i data_vec, temp [ 16 ] ;
-    unsigned char **sPnt ;                         // Data lookup pointers
+    unsigned char **sPnt ;                 // Data lookup pointers
 
     // Initialize the taps to the LFSR
    taps [ 0 ] = _mm512_broadcast_i32x2(*( __m128i * ) &PCAffTab[0xec]);
