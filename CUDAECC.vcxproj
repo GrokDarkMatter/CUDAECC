@@ -79,6 +79,13 @@
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DECODER_GFNI.c" />
+    <ClCompile Include="PLFSRSEQ_GFNI.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DECODER_GFNI.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 13.3.targets" />

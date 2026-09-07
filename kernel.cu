@@ -1,122 +1,315 @@
 ﻿
+//***************************************************************************************
+// Copyright 2026 by StreamScale Inc. All rights reserved.
+// This software is free to use for non-commercial or evaluation purposes, but may not 
+// be redistributed or sold for any commercial purpose without the express written
+// permission of StreamScale Inc.
+// 
+// In other words, this code is provided solely for the purposes of
+// evaluation and is not licensed or intended to be licensed or used as part of
+// or in connection with any commercial or non - commercial use other than evaluation
+// of the potential for a license from StreamScale Inc. Neither StreamScale Inc. 
+// nor any affiliated person grants any express or implied rights under any patents,
+// copyrights, trademarks, or trade secret information. 
+// 
+// This software includes contributions protected by 
+// U.S. Patents 11,848,686 and 12,341,532
+//***************************************************************************************
+
+#include <stdio.h>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#include <stdio.h>
+#include "kernel.cuh"
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+/* ------------------------------------------------------------------------------------ */
+/*                               Note CUDA code is inlined                              */
+/* ------------------------------------------------------------------------------------ */
+#include "PLFSRSEQ_CUDA.cu"
 
-__global__ void addKernel(int *c, const int *a, const int *b)
+/* ------------------------------------------------------------------------------------ */
+/*                                  GFNI Section                                        */
+/* ------------------------------------------------------------------------------------ */
+// Host side Codeword buffer pointers
+unsigned int* GPUBUFS[255];                // Host side copy of GPU buffers
+unsigned char* HOSTBUFS[255];              // Host side buffers for encoding/decoding
+int herror_count;                          // Host side error count for GPU decoder errors
+
+/* ------------------------------------------------------------------------------------ */
+/*         Allocate host and device buffers for testing, copy exp and log tables        */
+/* ------------------------------------------------------------------------------------ */
+int PCECCMalloc(int k, int p, int size)
 {
-    int i = threadIdx.x;
-    c[i] = a[i] + b[i];
-}
+    cudaError_t cudaStatus;
+	int totBuf = k + p;                     // Add extra buffers for the check buffers
 
-// First change
-int main()
-{
-    const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 };
-    const int b[arraySize] = { 10, 20, 30, 40, 50 };
-    int c[arraySize] = { 0 };
+    // Create and assign each buffer of the codeword
+    for (int i = 0; i < totBuf; i++)
+    {
+		// Allocate 1 buffer on the GPU and 1 buffer on the host
+        cudaStatus = cudaMalloc (&GPUBUFS[ i ], size);
+        if (cudaStatus != cudaSuccess)
+        {
+            fprintf (stderr, "cudaMalloc GPUBUFSfailed!");
+            return 1;
+        }
 
-    // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
+        cudaStatus = cudaMallocHost (&HOSTBUFS[ i ], size);
+        if (cudaStatus != cudaSuccess)
+        {
+            fprintf (stderr, "cudaMallocHost HOSTBUFS failed!");
+            return 1;
+        }
+
+		// Initialize the host buffer with some data
+        cudaStatus = cudaMemset(HOSTBUFS[i], 0x5a, BUFFER_SIZE);
+        if (cudaStatus != cudaSuccess)
+        {
+            fprintf(stderr, "cudaMemset HOSTBUFS failed!");
+            return 1;
+        }
+    
+        cudaStatus = cudaMemcpy (GPUBUFS[ i ], HOSTBUFS[ i ], BUFFER_SIZE, cudaMemcpyHostToDevice);
+        if (cudaStatus != cudaSuccess)
+        {
+            fprintf (stderr, "cudaMemcpy GPUBUFS failed!");
+            return 1;
+        }
+    }
+
+    // Copy the pointer array directly to the constant memory symbol
+    cudaStatus = cudaMemcpyToSymbol(CWP, GPUBUFS, 255 * sizeof(float*));
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaMemcpyToSymbol CWP failed!");
         return 1;
     }
 
-    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-        c[0], c[1], c[2], c[3], c[4]);
+    // Copy the 0 error count to the gpu
+    herror_count = 0;
+    cudaStatus = cudaMemcpyToSymbol(error_count, &herror_count, sizeof (int));
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaMemcpyToSymbol error_count failed!");
+        return 1;
+    }
 
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces.
-    cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!");
+    // Copy the power table to the gpu
+    cudaStatus = cudaMemcpyToSymbol(gf_exp_CUDA, &PCPowTab, sizeof(PCPowTab));
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaMemcpyToSymbol gf_exp_CUDA failed!");
+        return 1;
+    }
+
+    // Copy the log table to the gpu
+    cudaStatus = cudaMemcpyToSymbol(gf_log_CUDA, &PCLogTab, sizeof(PCLogTab));
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaMemcpyToSymbol gf_log_CUDA failed!");
         return 1;
     }
 
     return 0;
 }
 
-// Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
+/* ------------------------------------------------------------------------------------ */
+/*         Free buffers post testing                                                    */
+/* ------------------------------------------------------------------------------------ */
+void PCECCFree (int k, int p)
 {
-    int *dev_a = 0;
-    int *dev_b = 0;
-    int *dev_c = 0;
+    for (int i = 0; i < (k + p + p); ++i)
+    {
+        cudaFree (&GPUBUFS[ i ]);
+        cudaFreeHost (&HOSTBUFS[ i ]);
+    }
+}
+
+/* ------------------------------------------------------------------------------------ */
+/*   Inject errors for testing                                                          */
+/* ------------------------------------------------------------------------------------ */
+void InjectErrors()
+{
+	// Inject errors into the codeword buffers
+	for (int i = 0; i < 2; i++)
+	{
+		// Inject an error into the first byte of each parity buffer
+		HOSTBUFS[0][i] ^= 0x5a;
+		printf("Injected error %x into parity buffer %d\n", 0xff, i);
+	}
+	// Copy the modified parity buffers back to the GPU
+	for (int i = 0; i < 1; ++i)
+	{
+		cudaMemcpy(GPUBUFS[i], HOSTBUFS[i], BUFFER_SIZE, cudaMemcpyHostToDevice);
+	}
+}
+
+/* ------------------------------------------------------------------------------------ */
+/*   Print performance stats                                                            */
+/* ------------------------------------------------------------------------------------ */
+void ReportRate(float bytes, const char * str, std::chrono::steady_clock::time_point start, 
+    std::chrono::steady_clock::time_point end)
+{
+	// Cast the duration straight to nanoseconds
+	auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+	std::cout << str << "Execution time: " << elapsed_ns << " ns" << std::endl;
+	std::cout << "Bytes: " << bytes / (1024 * 1024) << " MBytes" << std::endl;
+	float ens = (float)elapsed_ns;
+	float rate = bytes / ens;
+	std::cout << "Rate: " << rate << " GB/s" << std::endl;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Check arguments, allocate buffers, encode and decode with CUDA and GFNI, free, exit  */
+/* ------------------------------------------------------------------------------------ */
+int main(int argc, char** argv)
+{
     cudaError_t cudaStatus;
+    int p = 8;
+    int k = 247;
 
-    // Choose which GPU to run on, change this on a multi-GPU system.
-    cudaStatus = cudaSetDevice(0);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-        goto Error;
+    /* Parse arguments */
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-k") == 0)
+        {
+            k = atoi(argv[++i]);
+        }
+        else if (strcmp(argv[i], "-p") == 0)
+        {
+            p = atoi(argv[++i]);
+        }
+        else
+        {
+            return -1;
+        }
     }
 
-    // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**)&dev_c, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
+    if (k <= 0)
+    {
+        printf("Number of source buffers (%d) must be > 0\n", k);
+        return -1;
     }
 
-    cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
+    if (p <= 0)
+    {
+        printf("Number of parity buffers (%d) must be > 0\n", p);
+        return -1;
     }
 
-    cudaStatus = cudaMalloc((void**)&dev_b, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
+    if (p > 32)
+    {
+		printf("Number of parity buffers (%d) must be <= 32\n", p);
+		return -1;
     }
 
-    // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
+	if (k + p > 255)
+	{
+		printf("Total number of buffers (%d) must be <= 255\n", k + p);
+		return -1;
+	}
 
-    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
+	printf("K=%d p=%d\n", k, p);
 
-    // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
+	// Allocate buffers for testing
+    PCECCMalloc (k, p, BUFFER_SIZE);
 
-    // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
-    
-    // cudaDeviceSynchronize waits for the kernel to finish, and returns
-    // any errors encountered during the launch.
+    // Print high level metrics and compute bytes for encoding/decoding
+    std::cout << "Threads: " << THDS << " Blocks:" << BLKS << std::endl;
+    float bytes = (float)STRD * THDS * BLKS * (k+p);
+
+    // Capture start timestamp
+    auto start = std::chrono::steady_clock::now();
+
+    // --------------------------------------------------------------------------
+    // CUDA Encoder test
+    // --------------------------------------------------------------------------
+    ParallelLFSRSequencer_CUDA(BLKS, THDS, k, p, 0);
+
     cudaStatus = cudaDeviceSynchronize();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
-        goto Error;
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching Kernel!\n", cudaStatus);
+        return 1;
     }
 
-    // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
+    // Capture end timestamp
+    auto end = std::chrono::steady_clock::now();
+
+    // Print rates for user
+    ReportRate(bytes, "CUDA Encode ", start, end);
+
+    start = std::chrono::steady_clock::now();
+
+    // --------------------------------------------------------------------------
+    // GFNI Encoder test
+    // --------------------------------------------------------------------------
+    ParallelLFSRSequencer_GFNI(BUFFER_SIZE, k, p, (unsigned char **)HOSTBUFS, 0);
+
+    end = std::chrono::steady_clock::now();
+
+    ReportRate(bytes, "GFNI Encode ", start, end);
+
+    // --------------------------------------------------------------------------
+	// Inject errors into the codeword buffers
+    // --------------------------------------------------------------------------
+    InjectErrors();
+
+    start = std::chrono::steady_clock::now();
+
+    // --------------------------------------------------------------------------
+    // CUDA Decoder test
+    // --------------------------------------------------------------------------
+    ParallelLFSRSequencer_CUDA(BLKS, THDS, k, p, 1);
+
+    cudaStatus = cudaDeviceSynchronize();
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching Kernel!\n", cudaStatus);
+        return 1;
     }
 
-Error:
-    cudaFree(dev_c);
-    cudaFree(dev_a);
-    cudaFree(dev_b);
-    
-    return cudaStatus;
+    // Capture end timestamp
+    end = std::chrono::steady_clock::now();
+
+    ReportRate(bytes, "CUDA Decode ", start, end);
+
+    // Copy the pointer array directly to the constant memory symbol
+    cudaStatus = cudaMemcpyFromSymbol(&herror_count, error_count, sizeof(int));
+    if (cudaStatus != cudaSuccess)
+    {
+        fprintf(stderr, "cudaMemcpyFromSymbol CWP failed!");
+        return 1;
+    }
+	printf("CUDA Error count: %d\n", herror_count);
+
+    start = std::chrono::steady_clock::now();
+
+    // --------------------------------------------------------------------------
+    // GFNI Decoder test
+    // --------------------------------------------------------------------------
+    ParallelLFSRSequencer_GFNI(BUFFER_SIZE, k, p, (unsigned char**)HOSTBUFS, 1);
+
+    // Capture end timestamp
+    end = std::chrono::steady_clock::now();
+
+    ReportRate(bytes, "GFNIcode ", start, end);
+
+    printf("GFNI Error Count: %d\n", herror_count);
+
+    // --------------------------------------------------------------------------
+	// All test done, free memory and reset device
+    // --------------------------------------------------------------------------
+    PCECCFree (k, p);
+
+    // cudaDeviceReset must be called before exiting in order for profiling and
+    // tracing tools such as Nsight and Visual Profiler to show complete traces.
+    cudaStatus = cudaDeviceReset();
+    if (cudaStatus != cudaSuccess) 
+    {
+        fprintf(stderr, "cudaDeviceReset failed!");
+        return 1;
+    }
+
+    return 0;
 }
