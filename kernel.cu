@@ -1,5 +1,4 @@
-﻿
-//***************************************************************************************
+﻿//***************************************************************************************
 // Copyright 2026 by StreamScale Inc. All rights reserved.
 // This software is free to use for non-commercial or evaluation purposes, but may not 
 // be redistributed or sold for any commercial purpose without the express written
