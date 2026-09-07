@@ -242,7 +242,7 @@ void InjectErrors()
 	{
         unsigned char err = 0x5a;
 		// Inject an error into the first byte of each parity buffer
-		HOSTBUFS[0][i] ^= err;
+		HOSTBUFS[0][BUFFER_SIZE - i - 1] ^= err;
 		printf("Injected error %x into parity buffer 0 offset %d\n", err, i);
 	}
 	// Copy the modified parity buffers back to the GPU
