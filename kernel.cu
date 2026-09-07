@@ -35,6 +35,114 @@ unsigned char* HOSTBUFS[255];              // Host side buffers for encoding/dec
 int herror_count;                          // Host side error count for GPU decoder errors
 
 /* ------------------------------------------------------------------------------------ */
+/*                           Code to identify host processor                            */
+/* ------------------------------------------------------------------------------------ */
+#include <windows.h>
+void
+get_cpu_brand(char* brand)
+{
+    int regs[4];
+    char* p = brand;
+    unsigned int max_level;
+
+    __cpuid(regs, 0x80000000);
+    max_level = regs[0];
+
+    if (max_level < 0x80000004)
+    {
+        strcpy(brand, "Unknown");
+        return;
+    }
+
+    for (unsigned int i = 0x80000002; i <= 0x80000004; ++i)
+    {
+        __cpuid(regs, i);
+        memcpy(p, regs, sizeof(regs));
+        p += sizeof(regs);
+    }
+    *p = '\0';
+
+    // Trim leading/trailing spaces
+    p = brand + strlen(brand) - 1;
+    while (p > brand && *p == ' ')
+        *p-- = '\0';
+    while (*brand == ' ')
+        ++brand;
+}
+int
+PC_CPU_ID(void)
+{
+    char brand[64] = { 0 }; // Initialize to avoid garbage
+    get_cpu_brand(brand);
+
+    SYSTEM_INFO si;
+    GetSystemInfo(&si);
+
+    printf("Processor Brand: %s\n", brand);
+    printf("Number of Logical Processors: %u\n", si.dwNumberOfProcessors);
+    printf("Processor Architecture: ");
+
+    switch (si.wProcessorArchitecture)
+    {
+    case PROCESSOR_ARCHITECTURE_AMD64:
+        printf("x64\n");
+
+        break;
+    case PROCESSOR_ARCHITECTURE_INTEL:
+        printf("x86\n");
+
+        break;
+    case PROCESSOR_ARCHITECTURE_ARM:
+        printf("ARM\n");
+
+        break;
+    default:
+        printf("Unknown\n");
+        break;
+    }
+
+    HKEY hKey;
+    DWORD mhz = 0;
+    DWORD size = sizeof(DWORD);
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0,
+        KEY_READ, &hKey) == ERROR_SUCCESS)
+    {
+        RegQueryValueEx(hKey, "~MHz", NULL, NULL, (LPBYTE)&mhz, &size);
+        RegCloseKey(hKey);
+        printf("Approximate Clock Speed: %u MHz\n", mhz);
+    }
+    else
+    {
+        printf("Failed to retrieve clock speed from registry\n");
+    }
+
+    return si.dwNumberOfProcessors;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/*                           Code to identify CUDA processor                            */
+/* ------------------------------------------------------------------------------------ */
+int GetGPU( void )
+{
+    int deviceId = 0; // The ID of the GPU you want to query
+    cudaDeviceProp prop;
+
+    // Fetch the device properties
+    cudaError_t status = cudaGetDeviceProperties(&prop, deviceId);
+
+    if (status == cudaSuccess) {
+        // prop.name is a standard null-terminated char array (char name[256])
+        std::cout << "GPU Device Name: " << prop.name << std::endl;
+    }
+    else {
+        std::cerr << "CUDA Error: " << cudaGetErrorString(status) << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+/* ------------------------------------------------------------------------------------ */
 /*         Allocate host and device buffers for testing, copy exp and log tables        */
 /* ------------------------------------------------------------------------------------ */
 int PCECCMalloc(int k, int p, int size)
@@ -132,9 +240,10 @@ void InjectErrors()
 	// Inject errors into the codeword buffers
 	for (int i = 0; i < 2; i++)
 	{
+        unsigned char err = 0x5a;
 		// Inject an error into the first byte of each parity buffer
-		HOSTBUFS[0][i] ^= 0x5a;
-		printf("Injected error %x into parity buffer %d\n", 0xff, i);
+		HOSTBUFS[0][i] ^= err;
+		printf("Injected error %x into parity buffer 0 offset %d\n", err, i);
 	}
 	// Copy the modified parity buffers back to the GPU
 	for (int i = 0; i < 1; ++i)
@@ -207,6 +316,9 @@ int main(int argc, char** argv)
 		printf("Total number of buffers (%d) must be <= 255\n", k + p);
 		return -1;
 	}
+
+    PC_CPU_ID();
+	GetGPU();
 
 	printf("K=%d p=%d\n", k, p);
 
@@ -312,3 +424,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
