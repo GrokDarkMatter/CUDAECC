@@ -25,10 +25,10 @@ Rate: 345.038 GB/s
 GFNI Encode Execution time: 498482200 ns
 Bytes: 4080 MBytes
 Rate: 8.58243 GB/s
-GPU Correcting buffer 0 offset 16777214 with 5a
-GPU Correcting buffer 0 offset 16777215 with 5a
 Injected error 5a into parity buffer 0 offset 0
 Injected error 5a into parity buffer 0 offset 1
+GPU Correcting buffer 0 offset 16777214 with 5a
+GPU Correcting buffer 0 offset 16777215 with 5a
 CUDA Decode Execution time: 14086200 ns
 Bytes: 4080 MBytes
 Rate: 303.715 GB/s
