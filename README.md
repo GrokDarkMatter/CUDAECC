@@ -5,7 +5,7 @@
 This project demonstrates the raw throughput differences between hardware-accelerated CPU implementations and massively parallel GPU implementations, showcasing exactly how much faster CUDA executes Reed-Solomon calculations compared to modern x86 extensions.
 
 ## Core Features
-* **GFNI SIMD Acceleration:** High-throughput x86 implementations utilizing AVX-512 / AVX2 with GFNI (`_mm512_vgf2p8affineinv_epi8`).
+* **GFNI SIMD Acceleration:** High-throughput x86 implementations utilizing AVX-512 / AVX2 with GFNI (`_mm512_gf2p8affine_epi64_epi8`).
 * **Massively Parallel CUDA:** Fine-grained GPU optimization leveraging high-bandwidth memory.
 * **Side-by-Side Validation:** End-to-end verification ensuring both implementations produce mathematically identical parity and reconstructed data.
 * **Automated Benchmarking:** Built-in telemetry to measure throughput (GB/s).
