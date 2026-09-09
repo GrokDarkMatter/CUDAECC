@@ -10,6 +10,14 @@ This project demonstrates the raw throughput differences between hardware-accele
 * **Side-by-Side Validation:** End-to-end verification ensuring both implementations produce mathematically identical parity and reconstructed data.
 * **Automated Benchmarking:** Built-in telemetry to measure throughput (GB/s).
 
+## File Structure
+* **kernel.cu** Kernel code that allocates buffers, calls encoder, injects errors, calls decoder, frees buffers and exits.
+* **PLFSRSEQ_CUDA.cu** Accelerated encoder and decoder for GPU based on Parallel LFSR Sequencers
+* **PLFSRSEQ_GFNI.c** Accelerated encoder and decoder for GFNI based on Parallel LFSR Sequencers
+* **DECODER_CUDA.cu** Error decoder for CUDA
+* **DECODER_GFNI.c** Error decoder for GFNI
+* **CUDAECC.vcxproj** Project file for Visual Studio
+
 ## Typical Benchmark Results
 ```text
 Processor Brand: AMD Ryzen AI 9 HX 375 w/ Radeon 890M
