@@ -8,7 +8,7 @@ This project demonstrates the raw throughput differences between hardware-accele
 
 In baseball, sage advice is to “be the ball”. For storage system design, similar sage advice is “be the data”. What’s the most important thing about digital data? Correctness. From the perspective of the data and the application that depends on it, the difference between similar data and the same data is the difference between life and death, between scientific progress and wasted time. This is as true for AI as it is for any massive problem to solve. The ability to detect and recover from errors in the data is the whole ballgame, that’s what “be the data” means.
  
-That’s why high performance ECC is so central to every data center in the world. The speed of recovery when a component fails (like a disk or flash drive) is ultimately limited by the speed of the ECC that protects it. That might be the single most important metric regarding the overall reliability of the data in the data center. If you can recover data faster, it is less likely to “die” (be corrupted). If you protect data more (give it more ECC symbols), it can survive more failures.  The amount of protection you give your data is directly translatable to the health of your data, and the speed and accuracy you can apply this protection or recovery dictates the overall reliability of all the data under protection.
+That’s why high performance ECC is so central to every data center in the world. The speed of recovery when a component fails (like a disk or flash drive) is ultimately limited by the speed of the ECC that protects it. That might be the single most important metric regarding the overall reliability of the data in the data center. If you can recover data faster, it is less likely to “die” (be corrupted). If you protect data more (give it more ECC symbols), it can survive more failures.  The amount of protection you give your data is directly translatable to the health of your data, and the speed and accuracy you can apply this protection or recovery dictates the overall reliability of all the data under protection. [Useful Reference on Reliability](https://github.com/GrokDarkMatter/CUDAECC/blob/master/ReliabilityPaper.pdf) [Useful Reference on Performance](https://github.com/GrokDarkMatter/CUDAECC/blob/master/PerformancePaper.pdf)
 
 ## Core Features
 * **GFNI SIMD Acceleration:** High-throughput x86 implementations utilizing AVX-512 / AVX2 with GFNI (`_mm512_gf2p8affine_epi64_epi8`).
@@ -168,3 +168,5 @@ To combat the terror of serious error,
 Use bits of appropriate parity.
  
 H.B. Mann
+
+[Useful reference for the Mathematics](https://github.com/GrokDarkMatter/CUDAECC/blob/master/BaylorWork-2021.pdf)
