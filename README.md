@@ -147,3 +147,18 @@ If you look near the top you will see GPU Speed of Light Throughput - which is a
 ## What is it that makes the CUDA solution so much faster?
 
 I'd say it's one thing, and it's why x86/ARM will never catch up in their current form. That "one thing" is giving the outermost control loop to the GPU. As an example, take ECC encoding/decoding. Here's how it works: In x86/GFNI or ARM/NEON, you're going to create an outermost control loop, usually a "for" loop that starts at zero and increments until it hits the end of the buffer. In CUDA, you won't write this "for" loop at all. Instead, you describe the outermost control loop to the GPU, and he schedules this for you. There's a huge advantage in that. For GFNI, the Codec sweeps across the codeword 64 bytes at a time, and that's what the memory controller sees, (apparently) random 64 byte reads. In contrast, for CUDA, you describe "thread groups" and "blocks" at the highest level. For example, in my CUDA ECC codec, I group 256 threads together, each one handles generation of 4 bytes of ECC. 256 threads as a group means a 4 byte (32 bit) thread is now a 1024 byte group (4 * 256). Then, all 26 of the Streaming Multiprocessors in my RTX 5060 Mobile load up 256 threads each. That's (26*1k) = 26k that's all synchronized across 26 SMs each with 256 threads. I'm not sure if CUDA optimizes across "waves" (the 26 sets of 256 threads) or not, but let's say they don't. GFNI presents what looks like random 64 byte requests to the memory controller, while CUDA presents 26k requests, an advantage of over 400:1. So as a CUDA programmer, you need to think of yourself as small, and feed the GPU scheduler the parameters he needs to organize huge memory accesses. As an x86/ARM programmer, there is no way to achieve this level of organization at the memory controller. Tacking on hardware matrix multiplication (as some propose) won't change the outcome. GPUs will dominate the performance equation for AI, ECC, and most scientific calculations for the foreseeable future because of this outermost control loop and the effect it has on memory accesses.
+
+## What about Erasure Codes?
+Erasure codes relate to Polynomial Codes the way the blind relate to the sighted. Erasure codes are not aware of their own defects (unknown errors), they depend on a separate mechanism to identify error location (like a seeing eye dog). Polynomial Codes are, from that point of view “self-aware”. After encoding, a codeword based on a Polynomial Code has enough information to identify and correct errors without any additional information. 
+ 
+Polynomial codes don’t depend upon the information that Erasure codes need. When running at GPU speeds, they simplify the whole data integrity ballgame. If a device in a protected group fails, you don’t need to identify which device failed, the code will identify the location and can apply the correction without any human involvement at all. It can also report all the details of the correction and estimate the remaining reliability of the codeword as a whole. Erasure codes, by contrast, are blind, and must be guided by a sighted party (who better be right, or data will be silently lost).
+ 
+A message with content and clarity
+ 
+Has gotten to be quite a rarity.
+ 
+To combat the terror of serious error,
+ 
+Use bits of appropriate parity.
+ 
+H.B. Mann
