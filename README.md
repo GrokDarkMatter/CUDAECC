@@ -106,7 +106,7 @@ Here's how it works: Imagine you want to multiply a number 3 in GF space. The wa
 
 ```
 
-For error decoding, there's no avoiding general purpose two argument multiplies. A power table and log table (PCPowTab and PCLogTab) for GF(2^8) PP 0x11d in expressed in DECODER_GFNI.h. These are copied to GPU 
+For error decoding, there's no avoiding general purpose two argument multiplies. A power table and log table (PCPowTab and PCLogTab) for GF(2^8) PP 0x11d is expressed in DECODER_GFNI.h. These are copied to GPU 
 memory by the kernel and held in gf_exp_CUDA and gf_log_CUDA, declared in DECODER_CUDA.cuh. Note that you don't want to use these tables for encoding or decoding because they tend to collide with each other in a GPU when shared by many threads, degrading the performance to a fraction of the original.
 
 ## Typical Benchmark Results
