@@ -10,6 +10,18 @@ This project demonstrates the raw throughput differences between hardware-accele
 * **Side-by-Side Validation:** End-to-end verification ensuring both implementations produce mathematically identical parity and reconstructed data.
 * **Automated Benchmarking:** Built-in telemetry to measure throughput (GB/s).
 
+## Data Structure
+**CUDAECC** manages Reed Solomon encoding and decoding across a group of up to 255 buffers. This provides
+error detection, correction and device fault tolerance at very high performance levels (>300GBytes/Second). **CUDAECC** contains ECC solutions in both CUDA and GFNI environments.
+
+The buffers in this code are allocated and freed in kernel.cu. They are stored in pointer arrays.
+
+**HOSTBUFS** is a pointer vector defined in kernel.cu, and holds the x86 addresses of buffers used for GFNI processing.
+
+**GPUBUFS** is a pointer vector defined in kernel.cu, and holds the GPU addresses of buffers used for CUDA processing.
+
+**CWP** is a pointer vector defined in DECODER_CUDA.cuh, is directly accessible by the GPU, and contains a copy of **GPUBUFS** 
+
 ## File Structure
 * **kernel.cu** Kernel code that allocates buffers, calls encoder, injects errors, calls decoder, frees buffers and exits.
 * **PLFSRSEQ_CUDA.cu** Accelerated encoder and decoder for GPU based on Parallel LFSR Sequencers
